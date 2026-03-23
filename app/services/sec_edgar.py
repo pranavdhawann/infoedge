@@ -1,5 +1,6 @@
 import requests
 import logging
+from urllib.parse import urlparse
 from groq import Groq
 from app.config import SEC_EDGAR_HEADERS, GROQ_API_KEY, GROQ_MODEL
 from app.services.cache import sec_filings_cache, get_cached, set_cached
@@ -8,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 _client = None
 _cik_map = None
+_SEC_ALLOWED_HOSTS = {"sec.gov", "www.sec.gov"}
 
 
 def _get_client():
@@ -15,6 +17,24 @@ def _get_client():
     if _client is None and GROQ_API_KEY:
         _client = Groq(api_key=GROQ_API_KEY)
     return _client
+
+
+def is_allowed_sec_url(url):
+    """Return True only for SEC-hosted HTTPS filing archive URLs."""
+    try:
+        parsed = urlparse((url or "").strip())
+    except ValueError:
+        return False
+
+    if parsed.scheme != "https":
+        return False
+
+    hostname = (parsed.hostname or "").lower()
+    if hostname not in _SEC_ALLOWED_HOSTS:
+        return False
+
+    # Limit to filing archive pages to reduce SSRF surface.
+    return parsed.path.startswith("/Archives/")
 
 
 def _load_cik_map():
@@ -72,7 +92,8 @@ def fetch_filings(ticker, filing_types=None, count=10):
         descriptions = recent.get("primaryDocDescription", [])
 
         filings = []
-        for i in range(len(forms)):
+        row_count = min(len(forms), len(dates), len(accessions))
+        for i in range(row_count):
             if forms[i] in filing_types:
                 accession_clean = accessions[i].replace("-", "")
                 cik_num = cik.lstrip("0")
@@ -107,8 +128,12 @@ def summarize_filing(filing_url, filing_type, company_name):
     if not client:
         return {"summary": "AI summary unavailable (no API key configured)"}
 
+    if not is_allowed_sec_url(filing_url):
+        return {"summary": "Invalid filing URL. Only SEC EDGAR filing archive URLs are allowed."}
+
     try:
         resp = requests.get(filing_url, headers=SEC_EDGAR_HEADERS, timeout=15)
+        resp.raise_for_status()
         content = resp.text[:8000]
     except Exception:
         return {"summary": "Unable to fetch filing content from SEC."}

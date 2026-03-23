@@ -17,19 +17,25 @@ SEC_FILINGS_CACHE_SIZE = 50
 
 # SEC EDGAR Configuration
 SEC_EDGAR_HEADERS = {
-    'User-Agent': 'Stock Screen info@stockscreen.app',
+    'User-Agent': os.environ.get('SEC_EDGAR_USER_AGENT', 'Stock Screen app@stockscreen.app'),
     'Accept-Encoding': 'gzip, deflate',
 }
 SEC_FILINGS_TTL = 1800  # 30 minutes
 
 # Resend Email Configuration
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-CONTACT_EMAIL = 'pranavdhawan99@gmail.com'
+CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
+
+# EmailJS Configuration (frontend contact form)
+EMAILJS_SERVICE_ID = os.environ.get('EMAILJS_SERVICE_ID', '')
+EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID', '')
+EMAILJS_PUBLIC_KEY = os.environ.get('EMAILJS_PUBLIC_KEY', '')
 
 # News Aggregation API Keys
 NEWSAPI_KEY = os.environ.get('NEWSAPI_KEY', '')
 FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
 ALPHAVANTAGE_API_KEY = os.environ.get('ALPHAVANTAGE_API_KEY', '')
+CURRENTS_API_KEY = os.environ.get('CURRENTS_API_KEY', '')
 
 # Aggregated news cache
 AGGREGATED_NEWS_CACHE_SIZE = 100

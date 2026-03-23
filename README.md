@@ -1,35 +1,26 @@
-# Stock Screen — AI Stock Sentiment Analysis & Market Intelligence
+# Stock Screen
 
-Real-time sentiment analysis for US and Indian stocks. Aggregates news from multiple sources, analyzes it with Groq (Llama 3.3 70B), surfaces SEC filings, and delivers actionable market intelligence.
+AI-powered stock analysis and market sentiment platform with real-time news aggregation, SEC filing intelligence, and predictive forecasting.
 
-[![Live](https://img.shields.io/badge/Live-stockscreen.app-brightgreen?style=flat-square)](https://stock-sentiment-app-egc2jnomta-uc.a.run.app)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![GCP Cloud Run](https://img.shields.io/badge/GCP-Cloud%20Run-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
+[![Live](https://img.shields.io/badge/Live-Stock%20Screen-brightgreen?style=flat-square)](https://stock-sentiment-app-egc2jnomta-uc.a.run.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-## Features
+## What it does
 
-- **AI Sentiment Analysis** — Groq LLM scores news sentiment with confidence metrics for any stock
-- **Multi-Source News** — Aggregates from Yahoo Finance, NewsAPI, Finnhub, and Alpha Vantage in parallel
-- **SEC EDGAR Filings** — Browse 10-K, 10-Q, 8-K filings with AI-generated summaries
-- **US + Indian Markets** — 50+ stocks across NYSE, NASDAQ, NSE, BSE with live index tracking
-- **AI Market Insights** — LLM-generated analysis of sentiment drivers, risks, and market context
-- **Interactive Charts** — Price history and sentiment trends via Chart.js
+- Real-time market sentiment analysis across US and Indian stocks
+- Multi-source financial news aggregation and AI scoring
+- SEC EDGAR filing summaries powered by large language models
+- AI forecasting engine with Graph Neural Networks *(coming soon)*
+- Interactive price charts and sentiment trend visualization
 
-## Stack
+## Tech
 
-Python · Flask · Groq API (Llama 3.3 70B) · Yahoo Finance · SEC EDGAR · Bootstrap 5 · Docker · Google Cloud Run
-
-## Run Locally
-
-```bash
-git clone https://github.com/pranavdhawann/stockscreen.git
-cd stockscreen
-cp .env.example .env   # add your GROQ_API_KEY
-pip install -r requirements.txt
-python app.py
-```
+Python, Flask, AI/ML, cloud-hosted. See `.env.example` for configuration.
 
 ## License
 
 MIT. Not financial advice.
+
+---
+
+Use the contact form on the app for inquiries.

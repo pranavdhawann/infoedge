@@ -7,15 +7,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def fetch_stock_data(symbol):
-    """Fetch real stock data from Yahoo Finance. Returns dict or None on failure."""
-    cached = get_cached(stock_data_cache, symbol)
+def fetch_stock_data(symbol, period='30d'):
+    """Fetch real stock data from Yahoo Finance. Returns dict or None on failure.
+
+    Args:
+        symbol: Stock ticker symbol
+        period: Time range - '30d', '1y', or '5y'
+    """
+    VALID_PERIODS = {'30d': ('1d', '30d'), '1y': ('1d', '1y'), '5y': ('1wk', '5y')}
+    interval, yf_range = VALID_PERIODS.get(period, ('1d', '30d'))
+
+    cache_key = f"{symbol}_{period}"
+    cached = get_cached(stock_data_cache, cache_key)
     if cached is not None:
         return cached
 
     try:
         yahoo_symbol = get_yahoo_symbol(symbol)
-        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{yahoo_symbol}?interval=1d&range=30d"
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{yahoo_symbol}?interval={interval}&range={yf_range}"
 
         response = requests.get(url, headers=YAHOO_HEADERS, timeout=YAHOO_TIMEOUT)
         response.raise_for_status()
@@ -35,12 +44,16 @@ def fetch_stock_data(symbol):
         quotes = result["indicators"]["quote"][0]
 
         chart_data = []
+        close_prices = quotes.get("close", [])
+        volumes = quotes.get("volume", [])
         for i, timestamp in enumerate(timestamps):
-            if (i < len(quotes["close"])
-                    and quotes["close"][i] is not None
-                    and quotes["close"][i] > 0):
-                price = float(quotes["close"][i])
-                volume = int(quotes["volume"][i]) if quotes["volume"][i] is not None else 0
+            if (i < len(close_prices)
+                    and close_prices[i] is not None
+                    and close_prices[i] > 0):
+                price = float(close_prices[i])
+                volume = 0
+                if i < len(volumes) and volumes[i] is not None:
+                    volume = int(volumes[i])
                 chart_data.append({
                     "date": timestamp * 1000,
                     "price": round(price, 2),
@@ -70,7 +83,7 @@ def fetch_stock_data(symbol):
             "data_source": "Yahoo Finance (Real-time)",
         }
 
-        set_cached(stock_data_cache, symbol, result_data)
+        set_cached(stock_data_cache, cache_key, result_data)
         return result_data
 
     except Exception as e:

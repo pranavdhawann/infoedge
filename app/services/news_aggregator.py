@@ -143,6 +143,90 @@ def fetch_from_alphavantage(symbol):
         return []
 
 
+def fetch_from_google_rss(symbol, company_name):
+    """Fetch news from Google News RSS (no API key required)."""
+    try:
+        import xml.etree.ElementTree as ET
+        from email.utils import parsedate_to_datetime
+
+        query = f"{symbol}+{company_name.split()[0]}+stock"
+        url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+        resp = requests.get(url, timeout=10, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; StockScreen/1.0)'
+        })
+        if resp.status_code != 200:
+            return []
+
+        root = ET.fromstring(resp.text)
+        items = []
+        for item_el in root.findall('.//item')[:10]:
+            title = item_el.findtext('title', '')
+            link = item_el.findtext('link', '')
+            pub_date_str = item_el.findtext('pubDate', '')
+            source = item_el.findtext('source', 'Google News')
+
+            try:
+                published = int(parsedate_to_datetime(pub_date_str).timestamp())
+            except Exception:
+                published = int(datetime.now().timestamp())
+
+            items.append({
+                'title': title,
+                'summary': '',
+                'link': link,
+                'publisher': source,
+                'published': published,
+            })
+        return items
+    except Exception as e:
+        logger.error("Google RSS fetch error: %s", e)
+        return []
+
+
+def fetch_from_marketwatch_rss(symbol):
+    """Fetch news from MarketWatch RSS (no API key required)."""
+    try:
+        import xml.etree.ElementTree as ET
+        from email.utils import parsedate_to_datetime
+
+        url = f"https://feeds.marketwatch.com/marketwatch/marketpulse/"
+        resp = requests.get(url, timeout=10, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; StockScreen/1.0)'
+        })
+        if resp.status_code != 200:
+            return []
+
+        root = ET.fromstring(resp.text)
+        items = []
+        symbol_lower = symbol.lower()
+        for item_el in root.findall('.//item')[:20]:
+            title = item_el.findtext('title', '')
+            desc = item_el.findtext('description', '') or ''
+            link = item_el.findtext('link', '')
+            pub_date_str = item_el.findtext('pubDate', '')
+
+            # Filter to items mentioning the stock
+            if symbol_lower not in title.lower() and symbol_lower not in desc.lower():
+                continue
+
+            try:
+                published = int(parsedate_to_datetime(pub_date_str).timestamp())
+            except Exception:
+                published = int(datetime.now().timestamp())
+
+            items.append({
+                'title': title,
+                'summary': desc[:200] if desc else '',
+                'link': link,
+                'publisher': 'MarketWatch',
+                'published': published,
+            })
+        return items[:5]
+    except Exception as e:
+        logger.error("MarketWatch RSS fetch error: %s", e)
+        return []
+
+
 def _dedup_news(items):
     """Remove duplicate articles by normalized title."""
     seen = set()
@@ -165,6 +249,8 @@ def aggregate_news(symbol, company_name):
     all_items = []
     sources = [
         ('yahoo', lambda: fetch_yahoo_news(symbol, company_name)),
+        ('google_rss', lambda: fetch_from_google_rss(symbol, company_name)),
+        ('marketwatch_rss', lambda: fetch_from_marketwatch_rss(symbol)),
     ]
 
     if NEWSAPI_KEY:
@@ -174,7 +260,7 @@ def aggregate_news(symbol, company_name):
     if ALPHAVANTAGE_API_KEY:
         sources.append(('alphavantage', lambda: fetch_from_alphavantage(symbol)))
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=6) as executor:
         futures = {executor.submit(fn): name for name, fn in sources}
         for future in as_completed(futures):
             source_name = futures[future]

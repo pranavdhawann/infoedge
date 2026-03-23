@@ -1,40 +1,85 @@
-# Byte-compiled / optimized / DLL files
+# ============================================================
+# PUBLIC: README, LICENSE, .env.example, HTML/CSS skeleton, Dockerfile
+# HIDDEN: All backend logic, API routes, services, configs
+# ============================================================
+
+# --- Core backend logic (HIDE) ---
+app/routes/
+app/services/
+app/config.py
+app/__init__.py
+app.py
+
+# --- Database & cache ---
+supabase_schema.sql
+new_tables.sql
+*.sqlite3
+
+# --- Environment & secrets ---
+.env
+*.pem
+*.key
+credentials.json
+
+# --- Python artifacts ---
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
 
-# Environments
-.env
+# --- Virtual environments ---
 .venv
-env/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
+transformers_env/
 
-# Docs and sensitive files
-docs/
+# --- Node / build ---
+node_modules/
+dist/
+build/
+
+# --- Logs ---
+*.log
+out.log
+logs/
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Cloud / deploy configs ---
 .dockerignore
 .gcloudignore
 .claude/
 
-# Logs
-out.log
-logs/
+# --- Docs (internal) ---
+docs/
 
-# pytest
+# --- Test / coverage ---
 .pytest_cache/
-
-# Unused model caches
-model_cache/
-
-# Virtual environments (custom names)
-transformers_env/
-
-# Empty scaffolding
 tests/
 .github/
+coverage/
+htmlcov/
+.coverage
 
-# Temp artifacts
+# --- Model / ML caches ---
+model_cache/
+
+# --- Temp artifacts ---
 all_files*.txt
 replace_script.py
+=*
+
+# --- Boilerplate docs with placeholder emails ---
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+PRIVACY.md
+SECURITY.md

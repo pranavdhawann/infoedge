@@ -2,7 +2,7 @@ import json
 import re
 import logging
 from groq import Groq
-from app.config import GROQ_API_KEY, GROQ_MODEL
+from app.config import GROQ_API_KEY, GROQ_MODEL, get_currency
 
 logger = logging.getLogger(__name__)
 
@@ -169,13 +169,7 @@ def generate_insights(news_items, symbol, company_name, stock_data):
     change_30d = _compute_change_30d(stock_data)
     price = stock_data.get('current_price', 'N/A') if stock_data else 'N/A'
     pct = stock_data.get('price_change_percent', 0) if stock_data else 0
-    currency = "₹" if symbol in ('TCS', 'INFY', 'WIPRO', 'HCLTECH', 'TECHM',
-                                   'HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK',
-                                   'SBIN', 'RELIANCE', 'HINDUNILVR', 'ITC',
-                                   'BHARTIARTL', 'MARUTI', 'SUNPHARMA', 'DRREDDY',
-                                   'CIPLA', 'DIVISLAB', 'BIOCON', 'ONGC', 'IOC',
-                                   'BPCL', 'ADANIGREEN', 'TATAPOWER', 'ZOMATO',
-                                   'PAYTM', 'POLICYBZR', 'NAZARA') else "$"
+    currency = get_currency(symbol)
 
     sent_label = _sentiment_label(pos, neg, total)
     sent_score = round((pos - neg) / max(total, 1), 2)

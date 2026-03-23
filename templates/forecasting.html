@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Forecasting - Stock Screen{% endblock %}
+
+{% block seo %}
+<meta name="description" content="Stock Screen Forecasting — AI-powered stock prediction using Graph Neural Networks, news sentiment, and multimodal analysis. Coming soon.">
+<meta property="og:title" content="Forecasting - Stock Screen">
+<meta property="og:description" content="AI-powered stock prediction using Graph Neural Networks and multimodal analysis.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Stock Screen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Forecasting - Stock Screen">
+<meta name="twitter:description" content="AI-powered stock prediction using Graph Neural Networks and multimodal analysis.">
+{% endblock %}
+
+{% block content %}
+<div class="title-section">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-10">
+                <h1 class="main-title">Forecasting</h1>
+                <p class="main-subtitle">Predictive intelligence for the markets</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+
+            <!-- Coming Soon Badge -->
+            <div style="margin-bottom: 32px;">
+                <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: #000; background: var(--accent-amber); padding: 3px 12px; font-weight: 700;">COMING SOON</span>
+            </div>
+
+            <!-- Main Card -->
+            <div class="card card-enhanced">
+                <div class="card-header" style="padding: 10px 16px;">
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber); text-transform: uppercase; letter-spacing: 0.1em;">
+                        <i class="fas fa-brain me-2"></i>FORECASTING ENGINE
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 40px 32px; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;">
+                    <p style="color: var(--text-primary); margin-bottom: 24px;">
+                        We're building something powerful. Our upcoming forecasting engine
+                        combines a Graph Neural Network with multimodal AI &mdash; meaning it
+                        reads price patterns, live news sentiment, stock correlations,
+                        SEC filings, and time series data all at once to predict where
+                        a stock is heading.
+                    </p>
+                    <p style="color: var(--text-secondary); margin-bottom: 32px;">
+                        No single signal. No guesswork. Everything, together.
+                    </p>
+
+                    <!-- Feature Grid -->
+                    <div class="row g-3 text-start" style="margin-bottom: 32px;">
+                        <div class="col-sm-6">
+                            <div style="border: 1px solid var(--border); padding: 14px 16px;">
+                                <div style="color: var(--accent-amber); font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 6px;">PRICE PATTERNS</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">Technical signals decoded by deep learning</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div style="border: 1px solid var(--border); padding: 14px 16px;">
+                                <div style="color: var(--accent-amber); font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 6px;">NEWS SENTIMENT</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">Real-time headlines analyzed for market impact</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div style="border: 1px solid var(--border); padding: 14px 16px;">
+                                <div style="color: var(--accent-amber); font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 6px;">STOCK CORRELATIONS</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">Graph Neural Network maps inter-stock relationships</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div style="border: 1px solid var(--border); padding: 14px 16px;">
+                                <div style="color: var(--accent-amber); font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 6px;">SEC FILINGS</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">10-K, 10-Q, 8-K parsed for forward-looking signals</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notify Me Section -->
+                    <div id="notifySection">
+                        <button class="btn btn-outline-primary" id="notifyBtn" style="border-radius: 0; font-family: var(--font-mono); font-size: 0.8rem; padding: 10px 32px; letter-spacing: 0.05em;">
+                            <i class="fas fa-bell me-2"></i>NOTIFY ME
+                        </button>
+                    </div>
+
+                    <!-- Email Input (hidden initially) -->
+                    <div id="notifyForm" style="display: none; max-width: 400px; margin: 0 auto;">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="email" id="waitlistEmail" placeholder="your@email.com"
+                                style="flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.8rem; padding: 10px 14px; outline: none;"
+                                autocomplete="email">
+                            <button id="waitlistSubmit" style="background: var(--accent-amber); color: #000; border: none; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 10px 20px; cursor: pointer; letter-spacing: 0.05em; white-space: nowrap;">
+                                JOIN
+                            </button>
+                        </div>
+                        <div id="waitlistError" style="display: none; color: var(--negative); font-size: 0.75rem; margin-top: 8px; text-align: left;"></div>
+                    </div>
+
+                    <!-- Success Message (hidden initially) -->
+                    <div id="notifySuccess" style="display: none;">
+                        <div style="color: var(--positive); font-size: 0.85rem;">
+                            <i class="fas fa-check-circle me-2"></i>You're on the list! Check your inbox.
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Message (hidden initially) -->
+                    <div id="notifyDuplicate" style="display: none;">
+                        <div style="color: var(--accent-amber); font-size: 0.85rem;">
+                            <i class="fas fa-info-circle me-2"></i>You're already on the list!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card card-enhanced">
+                <div class="card-header" style="padding: 10px 16px;">
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber); text-transform: uppercase; letter-spacing: 0.1em;">PRICING</span>
+                </div>
+                <div class="card-body" style="font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.7; padding: 32px 24px;">
+                    <div class="row g-4 justify-content-center">
+
+                        <!-- Free Tier -->
+                        <div class="col-md-4">
+                            <div style="border: 1px solid var(--border); padding: 28px 20px; text-align: center; height: 100%;">
+                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px;">FREE</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">$0</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">forever</div>
+                                <ul style="list-style: none; padding: 0; margin: 24px 0 0 0; font-size: 0.78rem; color: var(--text-secondary); text-align: left;">
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> Real-time news aggregation</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> AI sentiment analysis</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> SEC filing summaries</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> Market overview charts</li>
+                                    <li style="padding: 5px 0; color: var(--text-muted);"><span style="color: var(--text-muted);">&#10007;</span> Forecasting engine</li>
+                                    <li style="padding: 5px 0; color: var(--text-muted);"><span style="color: var(--text-muted);">&#10007;</span> Export reports</li>
+                                </ul>
+                                <div style="margin-top: 20px; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em;">CURRENT PLAN</div>
+                            </div>
+                        </div>
+
+                        <!-- Pro Monthly -->
+                        <div class="col-md-4">
+                            <div style="border: 1px solid var(--border); padding: 28px 20px; text-align: center; height: 100%;">
+                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-amber); margin-bottom: 12px;">PRO &mdash; MONTHLY</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--accent-amber);">$19<span style="font-size: 1rem; color: var(--text-muted);">.99</span></div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">per month</div>
+                                <ul style="list-style: none; padding: 0; margin: 24px 0 0 0; font-size: 0.78rem; color: var(--text-secondary); text-align: left;">
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> Everything in Free</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> GNN forecasting engine</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Predictive alerts</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Priority API access</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Export reports</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Extended historical data</li>
+                                </ul>
+                                <button class="btn btn-outline-primary w-100 mt-3" style="border-radius: 0; font-family: var(--font-mono); font-size: 0.75rem;" disabled>COMING SOON</button>
+                            </div>
+                        </div>
+
+                        <!-- Pro Yearly -->
+                        <div class="col-md-4">
+                            <div style="border: 1px solid var(--accent-amber); padding: 28px 20px; text-align: center; height: 100%; position: relative;">
+                                <div style="position: absolute; top: -10px; right: 12px; background: var(--accent-amber); color: #000; font-size: 0.6rem; font-weight: 700; padding: 2px 8px; letter-spacing: 0.05em;">SAVE 2 MONTHS</div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-amber); margin-bottom: 12px;">PRO &mdash; YEARLY</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--accent-amber);">$200</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">per year <span style="text-decoration: line-through;">$239.88</span></div>
+                                <ul style="list-style: none; padding: 0; margin: 24px 0 0 0; font-size: 0.78rem; color: var(--text-secondary); text-align: left;">
+                                    <li style="padding: 5px 0;"><span style="color: var(--positive);">&#10003;</span> Everything in Pro Monthly</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> 2 months free</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Early access to new features</li>
+                                    <li style="padding: 5px 0;"><span style="color: var(--accent-amber);">&#10003;</span> Priority support</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3" style="border-radius: 0; font-family: var(--font-mono); font-size: 0.75rem;" disabled>COMING SOON</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    const notifyBtn = document.getElementById('notifyBtn');
+    const notifyForm = document.getElementById('notifyForm');
+    const notifySection = document.getElementById('notifySection');
+    const notifySuccess = document.getElementById('notifySuccess');
+    const notifyDuplicate = document.getElementById('notifyDuplicate');
+    const emailInput = document.getElementById('waitlistEmail');
+    const submitBtn = document.getElementById('waitlistSubmit');
+    const errorEl = document.getElementById('waitlistError');
+
+    // Show email input on Notify Me click
+    notifyBtn.addEventListener('click', function() {
+        notifySection.style.display = 'none';
+        notifyForm.style.display = '';
+        emailInput.focus();
+    });
+
+    // Submit handler
+    function submitWaitlist() {
+        const email = emailInput.value.trim();
+        errorEl.style.display = 'none';
+
+        if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+            errorEl.textContent = 'Please enter a valid email address.';
+            errorEl.style.display = '';
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '...';
+
+        fetch('/api/waitlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email }),
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                notifyForm.style.display = 'none';
+                notifySuccess.style.display = '';
+            } else if (data.status === 'duplicate') {
+                notifyForm.style.display = 'none';
+                notifyDuplicate.style.display = '';
+            } else {
+                errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+                errorEl.style.display = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'JOIN';
+            }
+        })
+        .catch(function() {
+            errorEl.textContent = 'Network error. Please try again.';
+            errorEl.style.display = '';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'JOIN';
+        });
+    }
+
+    submitBtn.addEventListener('click', submitWaitlist);
+    emailInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitWaitlist();
+        }
+    });
+})();
+</script>
+{% endblock %}

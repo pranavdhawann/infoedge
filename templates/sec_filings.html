@@ -30,9 +30,9 @@
 <div class="container py-4">
     <!-- Search Section -->
     <div class="row justify-content-center mb-4">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="card card-enhanced">
-                <div class="card-body p-4">
+                <div class="card-body p-5">
                     <form id="secSearchForm" class="d-flex gap-3 align-items-end flex-wrap">
                         <div class="flex-grow-1" style="position: relative;">
                             <label class="form-label">Ticker Symbol</label>
@@ -67,11 +67,8 @@
     </div>
 
     <!-- Loading -->
-    <div id="secLoading" class="text-center d-none">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-2 text-muted">Fetching filings from SEC EDGAR...</p>
+    <div id="secLoading" class="text-center d-none py-3">
+        <span class="terminal-cursor">FETCHING FILINGS FROM SEC EDGAR</span>
     </div>
 
     <!-- Error -->
@@ -91,14 +88,13 @@
                     <div class="card-body p-4">
                         <h6 class="mb-3"><i class="fas fa-brain me-2" style="color: var(--accent-blue);"></i>AI Filing Overview</h6>
                         <div id="overviewLoading" class="text-center py-3">
-                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                            <span class="ms-2 text-muted">Generating overview...</span>
+                            <span class="terminal-cursor">GENERATING OVERVIEW</span>
                         </div>
                         <div id="overviewContent" class="d-none">
                             <p id="overviewText" class="mb-4" style="line-height: 1.7;"></p>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                    <div class="p-3 rounded" style="background: var(--bg-primary); border: 1px solid var(--border);">
                                         <h6 class="text-center mb-2" style="font-size: 0.85rem;">Filing Type Distribution</h6>
                                         <div style="height: 180px; cursor: pointer;" title="Click to expand">
                                             <canvas id="typeDoughnut"></canvas>
@@ -106,7 +102,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                    <div class="p-3 rounded" style="background: var(--bg-primary); border: 1px solid var(--border);">
                                         <h6 class="text-center mb-2" style="font-size: 0.85rem;">Filings by Year</h6>
                                         <div style="height: 180px; cursor: pointer;" title="Click to expand">
                                             <canvas id="yearBar"></canvas>
@@ -137,15 +133,14 @@
     <!-- Summary Modal -->
     <div class="modal fade" id="summaryModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content" style="background: var(--bg-primary); border: 1px solid var(--glass-border);">
-                <div class="modal-header" style="border-bottom-color: var(--glass-border);">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h5 class="modal-title" id="summaryModalTitle">Filing Summary</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div id="summaryLoading" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Generating AI summary...</p>
+                        <span class="terminal-cursor">GENERATING AI SUMMARY</span>
                     </div>
                     <div id="summaryContent" class="d-none" style="white-space: pre-wrap; line-height: 1.7;"></div>
                 </div>
@@ -163,7 +158,29 @@
     let currentCompanyName = '';
     let secSearchTimeout = null;
 
-    const TYPE_COLORS = { '10-K': '#6366F1', '10-Q': '#06B6D4', '8-K': '#F59E0B' };
+    const TYPE_COLORS = { '10-K': '#FFA500', '10-Q': '#00D4FF', '8-K': '#00FF88' };
+    const AUTOCOMPLETE_DEBOUNCE_MS = 150;
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeUrl(value) {
+        try {
+            const parsed = new URL(String(value ?? ''), window.location.origin);
+            if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                return parsed.href;
+            }
+        } catch (err) {
+            return '';
+        }
+        return '';
+    }
 
     // Autocomplete for ticker input
     const secTickerInput = document.getElementById('secTickerInput');
@@ -187,8 +204,8 @@
                         return;
                     }
                     secAutocomplete.innerHTML = results.map(stock => `
-                        <div class="autocomplete-item" data-symbol="${stock.symbol}">
-                            <strong>${stock.symbol}</strong> - ${stock.name}
+                        <div class="autocomplete-item" data-symbol="${String(stock.symbol || '').replace(/[^A-Za-z0-9.^-]/g, '')}">
+                            <strong>${escapeHtml(stock.symbol)}</strong> - ${escapeHtml(stock.name)}
                         </div>
                     `).join('');
                     secAutocomplete.style.display = 'block';
@@ -201,7 +218,7 @@
                     });
                 })
                 .catch(() => { secAutocomplete.style.display = 'none'; });
-        }, 150);
+        }, AUTOCOMPLETE_DEBOUNCE_MS);
     });
 
     // Keyboard navigation for autocomplete
@@ -292,24 +309,29 @@
 
         // Render filing cards
         const container = document.getElementById('filingsCardList');
-        container.innerHTML = data.filings.map((f, i) => {
-            const badgeColor = f.form === '10-K' ? 'background:#6366F1;' :
-                               f.form === '10-Q' ? 'background:#06B6D4;' : 'background:#F59E0B; color:#000;';
+        container.innerHTML = data.filings.map((f) => {
+            const safeForm = ['10-K', '10-Q', '8-K'].includes(f.form) ? f.form : String(f.form || '').replace(/[^A-Za-z0-9-]/g, '');
+            const badgeColor = safeForm === '10-K' ? 'background:#6366F1;' :
+                               safeForm === '10-Q' ? 'background:#06B6D4;' : 'background:#F59E0B; color:#000;';
             const date = new Date(f.filing_date).toLocaleDateString('en-US', {
                 month: 'short', day: 'numeric', year: 'numeric'
             });
+            const safeUrl = sanitizeUrl(f.url);
+            const encodedUrl = encodeURIComponent(safeUrl);
             return `
                 <div class="card card-enhanced mb-2 filing-card">
                     <div class="card-body p-3 d-flex align-items-center gap-3 flex-wrap">
-                        <span class="badge" style="${badgeColor} font-size: 0.8rem; padding: 6px 12px;">${f.form}</span>
-                        <span class="text-muted" style="min-width: 100px; font-size: 0.9rem;">${date}</span>
-                        <span class="flex-grow-1 text-muted" style="font-size: 0.9rem;">${f.description || f.form}</span>
+                        <span class="badge" style="${badgeColor} font-size: 0.8rem; padding: 6px 12px;">${escapeHtml(safeForm)}</span>
+                        <span class="text-muted" style="min-width: 100px; font-size: 0.9rem;">${escapeHtml(date)}</span>
+                        <span class="flex-grow-1 text-muted" style="font-size: 0.9rem;">${escapeHtml(f.description || safeForm)}</span>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary"
-                                    onclick="summarizeFiling('${f.url}', '${f.form}', ${i})">
+                            <button class="btn btn-sm btn-outline-primary" ${safeUrl ? '' : 'disabled'}
+                                    data-filing-url="${encodedUrl}"
+                                    data-filing-type="${safeForm}"
+                                    data-action="summarize-filing">
                                 <i class="fas fa-brain me-1"></i>Summarize
                             </button>
-                            ${f.url ? `<a href="${f.url}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                            ${safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
                                 <i class="fas fa-external-link-alt me-1"></i>View
                             </a>` : ''}
                         </div>
@@ -317,6 +339,15 @@
                 </div>
             `;
         }).join('');
+
+        container.querySelectorAll('[data-action="summarize-filing"]').forEach(button => {
+            button.addEventListener('click', function() {
+                const filingUrl = decodeURIComponent(this.dataset.filingUrl || '');
+                const filingType = this.dataset.filingType || '';
+                if (!filingUrl) return;
+                summarizeFiling(filingUrl, filingType);
+            });
+        });
 
         // Render timeline and local charts
         renderTimeline(data.filings);
@@ -351,8 +382,8 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11 } } },
-                        tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', titleColor: '#E2E8F0', bodyColor: '#E2E8F0' }
+                        legend: { labels: { color: '#999', font: { size: 10, family: "'JetBrains Mono', monospace" } } },
+                        tooltip: { backgroundColor: '#0f1117', titleColor: '#FFA500', bodyColor: '#E8E8E8', borderColor: '#2a2d35', borderWidth: 1, cornerRadius: 0 }
                     }
                 }
             });
@@ -370,20 +401,20 @@
                     datasets: [{
                         label: 'Filings',
                         data: years.map(y => yearCounts[y]),
-                        backgroundColor: '#6366F1',
-                        borderRadius: 4,
+                        backgroundColor: '#FFA500',
+                        borderRadius: 0,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748B', font: { size: 10 } } },
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748B', stepSize: 1, font: { size: 10 } } }
+                        x: { grid: { color: 'rgba(42,45,53,0.5)' }, ticks: { color: '#666', font: { size: 10, family: "'JetBrains Mono', monospace" } } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(42,45,53,0.5)' }, ticks: { color: '#666', stepSize: 1, font: { size: 10, family: "'JetBrains Mono', monospace" } } }
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: { backgroundColor: 'rgba(10,15,30,0.95)', titleColor: '#E2E8F0', bodyColor: '#E2E8F0' }
+                        tooltip: { backgroundColor: '#0f1117', titleColor: '#FFA500', bodyColor: '#E8E8E8', borderColor: '#2a2d35', borderWidth: 1, cornerRadius: 0 }
                     }
                 }
             });
@@ -448,19 +479,19 @@
                     x: {
                         type: 'time',
                         time: { unit: 'month', displayFormats: { month: 'MMM yyyy' } },
-                        grid: { color: 'rgba(255,255,255,0.04)' },
-                        ticks: { color: '#64748B', font: { size: 10 } },
+                        grid: { color: 'rgba(42,45,53,0.5)' },
+                        ticks: { color: '#666', font: { size: 10, family: "'JetBrains Mono', monospace" } },
                     },
                     y: {
                         display: true, min: 0, max: 4,
-                        ticks: { stepSize: 1, color: '#64748B', callback: v => ({ 1: '8-K', 2: '10-Q', 3: '10-K' }[v] || '') },
-                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: { stepSize: 1, color: '#666', font: { family: "'JetBrains Mono', monospace" }, callback: v => ({ 1: '8-K', 2: '10-Q', 3: '10-K' }[v] || '') },
+                        grid: { color: 'rgba(42,45,53,0.5)' },
                     }
                 },
                 plugins: {
-                    legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11 } } },
+                    legend: { labels: { color: '#999', font: { size: 10, family: "'JetBrains Mono', monospace" } } },
                     tooltip: {
-                        backgroundColor: 'rgba(10,15,30,0.95)', titleColor: '#E2E8F0', bodyColor: '#E2E8F0',
+                        backgroundColor: '#0f1117', titleColor: '#FFA500', bodyColor: '#E8E8E8', borderColor: '#2a2d35', borderWidth: 1, cornerRadius: 0,
                         callbacks: { label: ctx => `${ctx.dataset.label} - ${new Date(ctx.parsed.x).toLocaleDateString()}` }
                     }
                 }
@@ -468,7 +499,7 @@
         });
     }
 
-    function summarizeFiling(url, filingType, idx) {
+    function summarizeFiling(url, filingType) {
         const modal = new bootstrap.Modal(document.getElementById('summaryModal'));
         document.getElementById('summaryModalTitle').textContent = `${filingType} Summary - ${currentCompanyName}`;
         document.getElementById('summaryLoading').classList.remove('d-none');
@@ -507,7 +538,7 @@
         modal.innerHTML = `
             <div class="chart-modal-content">
                 <div class="chart-modal-header">
-                    <h5>${title} - Expanded View</h5>
+                    <h5>${escapeHtml(title)} - Expanded View</h5>
                     <button class="chart-modal-close">&times;</button>
                 </div>
                 <div class="chart-modal-body">
@@ -531,17 +562,27 @@
             options: chartOptions
         });
 
+        let isClosed = false;
+        const onEscape = function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        };
+
         function closeModal() {
+            if (isClosed) return;
+            isClosed = true;
             const ec = document.getElementById(`expanded-${canvasId}`);
             if (ec) { const ch = Chart.getChart(ec); if (ch) ch.destroy(); }
-            document.body.removeChild(modal);
+            document.removeEventListener('keydown', onEscape);
+            if (modal.parentNode) {
+                document.body.removeChild(modal);
+            }
         }
 
         modal.querySelector('.chart-modal-close').addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-        document.addEventListener('keydown', function handler(e) {
-            if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', handler); }
-        });
+        document.addEventListener('keydown', onEscape);
     }
 
     // Attach click-to-expand on SEC chart containers

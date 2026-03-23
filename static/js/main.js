@@ -30,9 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Active nav link highlighting
+    // Skip tab links (data-tab) — those are managed by index-page.js
     const currentPath = window.location.pathname;
     document.querySelectorAll('.nav-link-item').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
+        if (!link.dataset.tab && link.getAttribute('href') === currentPath) {
             link.classList.add('active');
         }
     });
@@ -91,83 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 
-    // Keyboard navigation for autocomplete
-    let currentAutocompleteIndex = -1;
-
-    document.addEventListener('keydown', function(e) {
-        const autocompleteItems = document.querySelectorAll('.autocomplete-item');
-        if (autocompleteItems.length === 0) return;
-
-        switch(e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                currentAutocompleteIndex = Math.min(currentAutocompleteIndex + 1, autocompleteItems.length - 1);
-                updateAutocompleteSelection(autocompleteItems);
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                currentAutocompleteIndex = Math.max(currentAutocompleteIndex - 1, -1);
-                updateAutocompleteSelection(autocompleteItems);
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (currentAutocompleteIndex >= 0 && autocompleteItems[currentAutocompleteIndex]) {
-                    autocompleteItems[currentAutocompleteIndex].click();
-                }
-                break;
-            case 'Escape':
-                document.getElementById('autocompleteDropdown').style.display = 'none';
-                currentAutocompleteIndex = -1;
-                break;
-        }
-    });
-
-    function updateAutocompleteSelection(items) {
-        items.forEach((item, index) => {
-            if (index === currentAutocompleteIndex) {
-                item.style.backgroundColor = 'rgba(59, 130, 246, 0.15)';
-                item.style.fontWeight = '600';
-            } else {
-                item.style.backgroundColor = '';
-                item.style.fontWeight = '';
-            }
-        });
-    }
-
-    // Copy to clipboard
-    function addCopyToClipboard() {
-        document.querySelectorAll('.copy-result').forEach(button => {
-            button.addEventListener('click', function() {
-                const textToCopy = this.dataset.copyText;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    const originalText = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
-                    setTimeout(() => { this.innerHTML = originalText; }, 2000);
-                }).catch(err => console.error('Failed to copy:', err));
-            });
-        });
-    }
-
-    // Share functionality
-    function addShareFunctionality() {
-        if (navigator.share) {
-            document.querySelectorAll('.share-result').forEach(button => {
-                button.addEventListener('click', async function() {
-                    try {
-                        await navigator.share({
-                            title: 'Stock Sentiment Analysis',
-                            text: this.dataset.shareText,
-                            url: window.location.href
-                        });
-                    } catch (err) { console.error('Share error:', err); }
-                });
-            });
-        }
-    }
-
-    addCopyToClipboard();
-    addShareFunctionality();
-
     // Global error handler
     window.addEventListener('unhandledrejection', function(event) {
         console.error('Unhandled promise rejection:', event.reason);
@@ -198,6 +122,18 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('scroll', function() {
             backToTopBtn.classList.toggle('visible', window.pageYOffset > 300);
         });
+    }
+
+    // Weekend / market closed indicator
+    const statusDot = document.getElementById('statusDot');
+    const statusLabel = document.getElementById('statusLabel');
+    if (statusDot && statusLabel) {
+        const day = new Date().getDay();
+        if (day === 0 || day === 6) {
+            statusDot.classList.add('closed');
+            statusDot.title = 'Market Closed';
+            statusLabel.textContent = 'MARKET CLOSED';
+        }
     }
 });
 

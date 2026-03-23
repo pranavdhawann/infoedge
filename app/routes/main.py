@@ -33,6 +33,6 @@ def sec_filings():
     return render_template('sec_filings.html')
 
 
-@main_bp.route('/contact')
-def contact():
-    return render_template('contact.html')
+@main_bp.route('/forecasting')
+def forecasting():
+    return render_template('forecasting.html')
