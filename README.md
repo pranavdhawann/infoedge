@@ -11,7 +11,7 @@
 
 ## Live Demo
 
-**[stock-screen-25476982226.us-central1.run.app](https://stock-screen-25476982226.us-central1.run.app/)**
+**[GO TO APP](https://stock-screen-25476982226.us-central1.run.app/)**
 
 ---
 
@@ -31,22 +31,6 @@ Price charts with 30-day, 1-year, and 5-year views. Sentiment trend overlays. Po
 
 ### AI Forecasting Engine *(Coming Soon)*
 Graph Neural Networks combining price patterns, news sentiment, stock correlations, SEC filings, and time-series data for directional predictions.
-
-### Bloomberg Terminal Aesthetic
-Dark, monospace, data-dense UI designed for fast scanning — inspired by professional trading terminals.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.11, Flask, Gunicorn |
-| AI/ML | Groq LLM API, NLP sentiment analysis |
-| Data | Yahoo Finance, Finnhub, Currents API, SEC EDGAR |
-| Database | Supabase (PostgreSQL) with persistent caching |
-| Frontend | Jinja2, Bootstrap 5, Chart.js, vanilla JS |
-| Deploy | Docker, Google Cloud Run, Cloud Build |
 
 ---
 
